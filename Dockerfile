@@ -1,7 +1,5 @@
-FROM golang:1.19 AS build-stage
+FROM alpine
 WORKDIR ./app
 COPY  ./app .
-CMD ["./counter"]
+CMD ["./counter_front"]
 
-FROM build-stage AS run-test-stage
-RUN go test -v

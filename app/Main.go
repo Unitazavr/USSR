@@ -2,7 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -39,5 +42,33 @@ func main() {
 		}
 		matrix = append(matrix, row)
 	}
-	fmt.Println("Ваше среднее арифметическое: ", CountMiddleValue(matrix))
+	// Преобразуем матрицу в JSON
+	matrixJSON, err := json.Marshal(matrix)
+	if err != nil {
+		fmt.Println("Ошибка преобразования в JSON:", err)
+		return
+	}
+
+	// Отправляем POST-запрос на сервер
+	resp, err := http.Post("http://localhost:8087/calculate", "application/json", bytes.NewBuffer(matrixJSON))
+	if err != nil {
+		fmt.Println("Ошибка при отправке запроса:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Читаем ответ от сервера
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Сервер вернул ошибку:", resp.Status)
+		return
+	}
+
+	var result map[string]float64
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		fmt.Println("Ошибка чтения ответа:", err)
+		return
+	}
+
+	fmt.Println("Ваше среднее арифметическое:", result["average"])
 }

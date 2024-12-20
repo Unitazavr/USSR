@@ -1,3 +1,3 @@
-module MatrixMiddleValue/app
+module main
 
 go 1.19
